@@ -11,6 +11,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class Map extends FragmentActivity implements OnMapReadyCallback {
@@ -25,6 +26,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
 
 
         Spinner  dropdown = (Spinner)findViewById(R.id.spinner1);
@@ -49,11 +51,12 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        
+
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+        LatLng kmitl = new LatLng(13.727876, 100.772365);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(kmitl,17.0f));
+        Marker KMITL = mMap.addMarker(new MarkerOptions().position(kmitl).draggable(true).title("Drag to your destination"));
     }
 }
