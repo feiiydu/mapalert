@@ -34,8 +34,7 @@
         android:layout_height="match_parent"
         android:id="@+id/button2"
         android:layout_weight="1"
-            android:gravity="center_horizontal"
-            tools:gravity="center_vertical|fill_horizontal" />
+         />
         <Button
 
         android:text="Clear"
