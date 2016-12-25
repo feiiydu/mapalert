@@ -25,11 +25,9 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         Spinner  dropdown = (Spinner)findViewById(R.id.spinner1);
-<<<<<<< HEAD
+
         String[] items = new String[]{"Choose radius","0.5 km", "1 km", "2 km"};
-=======
-        String[] items = new String[]{"Choose radius","500m","1km", "2km"};
->>>>>>> origin/master
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
         dropdown.setAdapter(adapter);
 
