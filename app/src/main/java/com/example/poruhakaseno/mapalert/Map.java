@@ -2,7 +2,9 @@ package com.example.poruhakaseno.mapalert;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,6 +36,21 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import android.location.Location;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.TextView;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+
+
+
 public class Map extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -41,6 +58,8 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
     LocationManager locationManager;
     PendingIntent pendingIntent;
     SharedPreferences sharedPreferences;
+    private GoogleApiClient googleApiClient;
+
 
 
 
@@ -55,12 +74,23 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
 
 
 
+
+
+
         Spinner  dropdown = (Spinner)findViewById(R.id.spinner1);
 
         String[] items = new String[]{"Choose radius","0.5 km", "1 km", "2 km"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
         dropdown.setAdapter(adapter);
+
+        Button yourButton = (Button) findViewById(R.id.button3);
+        yourButton.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                mMap.clear();
+               // mMap.moveCamera();
+            }
+        });
 
 
 
@@ -69,6 +99,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
 
 
     }
+
     public  int  returnradious(){
         Spinner  dropdown = (Spinner)findViewById(R.id.spinner1);
         int ans;
@@ -89,6 +120,10 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
     public void onMapReady(final GoogleMap googleMap) {
         LatLng kmitl = new LatLng(13.752092, 100.500893);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(kmitl,10.0f));
+        Marker mylocate;
+        
+
+
         googleMap.setOnMapClickListener(new OnMapClickListener() {
             Marker mydestination;
             @Override
@@ -102,6 +137,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
         });
 
     }
+
 
 
     private void drawMarker(LatLng point){
