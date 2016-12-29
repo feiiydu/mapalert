@@ -90,11 +90,12 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
         LatLng kmitl = new LatLng(13.752092, 100.500893);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(kmitl,10.0f));
         googleMap.setOnMapClickListener(new OnMapClickListener() {
+            Marker mydestination;
             @Override
             public void onMapClick(LatLng latLng) {
                 mMap = googleMap;
                 mMap.clear();
-                Marker mydes = mMap.addMarker(new MarkerOptions().position(latLng).title("My Destination"));
+                mydestination = mMap.addMarker(new MarkerOptions().position(latLng).title("My Destination"));
                 if(returnradious()!=0)Toast.makeText(getBaseContext(), "Proximity Alert is added", Toast.LENGTH_SHORT).show();
                 mMap.addCircle(new CircleOptions().center(latLng).radius(returnradious()).fillColor(Color.BLUE).strokeWidth(2).strokeColor(Color.BLACK));
             }
