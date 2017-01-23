@@ -1,7 +1,11 @@
 package com.example.poruhakaseno.mapalert;
 
+import android.app.NotificationManager;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -49,9 +53,11 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import static com.example.poruhakaseno.mapalert.ProximityIntentReceiver.NOTIFICATION_ID;
 
 
 public class Map extends FragmentActivity implements OnMapReadyCallback {
+    private static final String PROX_ALERT_INTENT = "com.example.poruhakaseno.mapalert";
 
     private GoogleMap mMap;
     GoogleMap googleMap;
@@ -59,6 +65,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
     PendingIntent pendingIntent;
     SharedPreferences sharedPreferences;
     private GoogleApiClient googleApiClient;
+    NotificationManager manager;
 
 
 
@@ -72,11 +79,6 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
-
-
-
-
         Spinner  dropdown = (Spinner)findViewById(R.id.spinner1);
 
         String[] items = new String[]{"Choose radius","0.5 km", "1 km", "2 km"};
@@ -88,18 +90,86 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
         yourButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 mMap.clear();
+                mydest = null;
+                Toast.makeText(getApplicationContext(),"Already Cleared..",Toast.LENGTH_SHORT).show();
                // mMap.moveCamera();
             }
         });
 
+        Button butclear = (Button) findViewById(R.id.button2);
+        butclear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                manager.cancel(1000);
+                Toast.makeText(getApplicationContext(),"Alert Stopped.. ",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        Button butstart = (Button) findViewById(R.id.button4);
+        butstart.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                double lat2 = mydest.latitude;
+                double lon2 = mydest.longitude;
+                double lat1 = mMap.getMyLocation().getLatitude();
+                double lon1 = mMap.getMyLocation().getLongitude();
+
+                addProximityAlert();
+                Location locationA = new Location("point A");
+                locationA.setLatitude(lat1);
+                locationA.setLongitude(lon1);
+                Location locationB = new Location("point B");
+                locationB.setLatitude(lat2);
+                locationB.setLongitude(lon2);
+                float distance = locationA.distanceTo(locationB);
+                Toast.makeText(getApplicationContext(), "Distance: "
+                        + distance, Toast.LENGTH_SHORT).show();
+                //add proxi alert
+                LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+                if(checkPermission()){}
+                locationManager.addProximityAlert(mydest.latitude,mydest.longitude, 50, 60000, proximityIntent);
+                IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT);
+                registerReceiver(new ProximityIntentReceiver(), filter);
+                Toast.makeText(getApplicationContext(),"Alert Started.. ",Toast.LENGTH_SHORT).show();
 
 
 
 
-
+            }
+        });
 
     }
 
+
+    PendingIntent proximityIntent;
+    private void addProximityAlert() {
+        Intent intent = new Intent(PROX_ALERT_INTENT);
+         proximityIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+    }
+    private static final String TAG = "location";
+    static final int  REQUEST_locate_PERMISSION = 1;
+    private boolean checkPermission(){
+        if (android.os.Build.VERSION.SDK_INT >= 23 ) {
+            //requestPermissions(new String[]{Manifest.permission.LOCATION}, REQUEST_locate_PERMISSION);
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[]   permissions, int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_locate_PERMISSION:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG,"Premission granted");
+                }else {
+                    Log.d(TAG,"Premission denied");
+                }
+                break;
+        }
+    }
     public  int  returnradious(){
         Spinner  dropdown = (Spinner)findViewById(R.id.spinner1);
         int ans;
@@ -116,13 +186,11 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
         return ans;
 
     }
+    LatLng mydest = null;
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         LatLng kmitl = new LatLng(13.752092, 100.500893);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(kmitl,10.0f));
-        Marker mylocate;
-        
-
 
         googleMap.setOnMapClickListener(new OnMapClickListener() {
             Marker mydestination;
@@ -133,6 +201,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
                 mydestination = mMap.addMarker(new MarkerOptions().position(latLng).title("My Destination"));
                 if(returnradious()!=0)Toast.makeText(getBaseContext(), "Proximity Alert is added", Toast.LENGTH_SHORT).show();
                 mMap.addCircle(new CircleOptions().center(latLng).radius(returnradious()).fillColor(Color.BLUE).strokeWidth(2).strokeColor(Color.BLACK));
+                mydest = latLng;
             }
         });
 

@@ -14,6 +14,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         //โค้ด intent
         Button yourButton = (Button) findViewById(R.id.button1);
+        Button howto = (Button) findViewById(R.id.howtousebtn);
+
+        howto.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                startActivity(new Intent(MainActivity.this, Howto.class));
+            }
+        });
+
         yourButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 startActivity(new Intent(MainActivity.this, Map.class));

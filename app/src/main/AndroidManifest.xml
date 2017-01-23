@@ -11,7 +11,11 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="in.wptrafficanalyzer.proximitymapv2.permission.MAPS_RECEIVE"/>
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+
     <uses-permission android:name="android.permission.INTERNET"/>
+
 
 
 
@@ -42,13 +46,11 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDkEmauE_hfpKKTwhl-0wQGCsifhwJxliU" />
+        <activity android:name=".Howto"></activity>
 
         <activity
             android:name=".Map"
             android:label="@string/title_activity_map"></activity>
-
-
-
     </application>
 
 </manifest>
