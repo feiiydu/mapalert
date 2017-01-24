@@ -8,17 +8,10 @@
          location permissions for the 'MyLocation' functionality. 
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="in.wptrafficanalyzer.proximitymapv2.permission.MAPS_RECEIVE"/>
-
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="in.wptrafficanalyzer.proximitymapv2.permission.MAPS_RECEIVE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-
-
-    <uses-permission android:name="android.permission.INTERNET"/>
-
-
-
-
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -28,7 +21,7 @@
         android:theme="@style/AppTheme">
         <uses-library android:name="com.google.android.maps" />
         //ขอเพจเปิดหน้าต่างๆ
-        <activity android:name=".MainActivity">
+        <activity android:name=".SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,11 +39,12 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDkEmauE_hfpKKTwhl-0wQGCsifhwJxliU" />
-        <activity android:name=".Howto"></activity>
 
+        <activity android:name=".Howto" />
         <activity
             android:name=".Map"
-            android:label="@string/title_activity_map"></activity>
+            android:label="@string/title_activity_map" />
+        <activity android:name=".MainActivity"></activity>
     </application>
 
 </manifest>
