@@ -121,7 +121,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
             @Override
             public void onClick(View view) {
                 try {
-                    manager.cancel(1000);
+                    manager.cancel(77);
                     error =0;
                 }catch (NullPointerException e){
                     error =1;
@@ -139,14 +139,15 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
         butstart.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                double lat2 = mydest.latitude;
-                double lon2 = mydest.longitude;
 
 
-                if(returnradious()==0){
-                    Toast.makeText(getApplicationContext(), "Please Choose radios first.. ", Toast.LENGTH_SHORT).show();
+
+                if(returnradious()==0 || mydest== null ){
+                    Toast.makeText(getApplicationContext(), "Please set your destination.. ", Toast.LENGTH_SHORT).show();
                 }
                 else {
+                    double lat2 = mydest.latitude;
+                    double lon2 = mydest.longitude;
                     addProximityAlert();
                     Location locationA = new Location("point A");
                     locationA.setLatitude(lat1);
@@ -156,7 +157,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
                     locationB.setLongitude(lon2);
                     float distance = locationA.distanceTo(locationB);
                     Toast.makeText(getApplicationContext(), "Distance: "
-                            + distance, Toast.LENGTH_SHORT).show();
+                            + distance + "m.", Toast.LENGTH_SHORT).show();
                     //add proxi alert
                     LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
                     if (checkPermission()) {
@@ -242,7 +243,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
                 mMap = googleMap;
                 mMap.clear();
                 mydestination = mMap.addMarker(new MarkerOptions().position(latLng).title("My Destination"));
-                if(returnradious()!=0)Toast.makeText(getBaseContext(), "Proximity Alert is added", Toast.LENGTH_SHORT).show();
+                if(returnradious()!=0)Toast.makeText(getBaseContext(), "Alert is added", Toast.LENGTH_SHORT).show();
                 mMap.addCircle(new CircleOptions().center(latLng).radius(returnradious()).fillColor(Color.BLUE).strokeWidth(2).strokeColor(Color.BLACK));
                 mydest = latLng;
             }

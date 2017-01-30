@@ -6,23 +6,29 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.util.Log;
+
+
+import static java.security.AccessController.getContext;
 
 public class ProximityIntentReceiver extends BroadcastReceiver {
     public static final int NOTIFICATION_ID = 1000;
     Notification notification ;
     Context context2 ;
-    Bitmap bitmap = BitmapFactory.decodeResource(context2.getResources(),
-            R.mipmap.ic_launcher);
 
     @SuppressWarnings("deprecation")
     @Override
     public void onReceive(Context context, Intent intent) {
         context2 = context;
+        Bitmap bitmap= BitmapFactory.decodeResource(context.getResources(),
+                R.drawable.icongg);
         String key = LocationManager.KEY_PROXIMITY_ENTERING;
         Boolean entering = intent.getBooleanExtra(key, false);
         if (entering) {
@@ -36,7 +42,7 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
         Notification.Builder builder = new Notification.Builder(context);
-        builder.setAutoCancel(false);
+        builder.setAutoCancel(true);
         builder.setTicker("Map Alert !!");
         builder.setContentTitle("Map Alert !!");
         builder.setContentText("You are near your destination...");
@@ -49,7 +55,7 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         builder.build();
 
         notification = builder.getNotification();
-        notificationManager.notify(1000, notification);
+        notificationManager.notify(77, notification);
     }
 
 
