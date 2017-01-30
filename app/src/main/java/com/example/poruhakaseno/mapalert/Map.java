@@ -2,6 +2,7 @@ package com.example.poruhakaseno.mapalert;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.provider.SyncStateContract;
@@ -91,10 +92,11 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
     GoogleMap googleMap;
     LocationManager locationManager;
     PendingIntent pendingIntent;
+    int countprox=0;
     SharedPreferences sharedPreferences;
     private GoogleApiClient googleApiClient;
     int PLACE_PICKER_REQUEST = 1;
-    public NotificationManager manager;
+
     LatLng now;
     int error=0;
     GoogleApiClient mGoogleApiClient;
@@ -165,14 +167,15 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
         Button yourButton = (Button) findViewById(R.id.button3);
         yourButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
+                mydest=null;
                 try {
                     mMap.clear();
                     if(checkPermission()) {
                         locationManager.removeProximityAlert(proximityIntent);
                     }
                     Toast.makeText(getApplicationContext(),"Already Cleared..",Toast.LENGTH_SHORT).show();}
-                catch(NullPointerException e){Toast.makeText(getApplicationContext(),"No alert to clear..",Toast.LENGTH_SHORT).show();}
-
+                catch(NullPointerException e){Toast.makeText(getApplicationContext(),"No alert to clear..",Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -181,7 +184,10 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
             @Override
             public void onClick(View view) {
                 try {
-                    manager.cancelAll();
+                    NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    manager.cancel(77);
+                    
+                    mydest=null;
                     if(checkPermission()) {
                         locationManager.removeProximityAlert(proximityIntent);
                     }
@@ -230,7 +236,10 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
                         locationManager.addProximityAlert(mydest.latitude, mydest.longitude, returnradious(), 60000, proximityIntent);
                     }
                     IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT);
-                    registerReceiver(new ProximityIntentReceiver(), filter);
+                    if(countprox==0){
+                        registerReceiver(new ProximityIntentReceiver(), filter);
+                        countprox=1;
+                    }
                     Toast.makeText(getApplicationContext(), "Alert Started.. ", Toast.LENGTH_SHORT).show();
                 }
 

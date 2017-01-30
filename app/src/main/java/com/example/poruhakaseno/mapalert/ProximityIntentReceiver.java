@@ -44,7 +44,7 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
         Notification.Builder builder = new Notification.Builder(context);
-        builder.setAutoCancel(true);
+        builder.setAutoCancel(false);
         builder.setTicker("Map Alert !!");
         builder.setContentTitle("Map Alert !!");
         builder.setContentText("You are near your destination...");
@@ -54,7 +54,6 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         builder.setLights(Color.RED, 3000, 3000);
         builder.setSound(Uri.parse("uri://sadfasdfasdf.mp3"));
         builder.setContentIntent(pendingIntent);
-        builder.setOngoing(true);
         builder.setSubText("Please looking for your destination.");
         builder.build();
 
