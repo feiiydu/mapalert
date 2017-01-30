@@ -108,9 +108,10 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
         Button yourButton = (Button) findViewById(R.id.button3);
         yourButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                mMap.clear();
+                try {mMap.clear();
                 mydest = null;
-                Toast.makeText(getApplicationContext(),"Already Cleared..",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Already Cleared..",Toast.LENGTH_SHORT).show();}
+                catch(NullPointerException e){Toast.makeText(getApplicationContext(),"No alert to clear..",Toast.LENGTH_SHORT).show();}
                // mMap.moveCamera();
             }
         });
