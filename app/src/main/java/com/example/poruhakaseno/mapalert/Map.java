@@ -221,9 +221,9 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
                     Location locationB = new Location("point B");
                     locationB.setLatitude(lat2);
                     locationB.setLongitude(lon2);
-                    float distance = locationA.distanceTo(locationB);
+                    float distance = locationA.distanceTo(locationB)/1000;
                     Toast.makeText(getApplicationContext(), "Distance: "
-                            + distance + "m.", Toast.LENGTH_SHORT).show();
+                            + String.format("%.2f",distance) + " km.", Toast.LENGTH_SHORT).show();
                     //add proxi alert
                     locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
                     if (checkPermission()) {
