@@ -48,7 +48,7 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         builder.setTicker("Map Alert !!");
         builder.setContentTitle("Map Alert !!");
         builder.setContentText("You are near your destination...");
-        builder.setSmallIcon(R.drawable.howtousebutton);
+        builder.setSmallIcon(R.drawable.carnoti);
         builder.setLargeIcon(bitmap);
         builder.setVibrate(new long[] { 500, 500, 500, 500, 500, 1000,1000, 1000, 1000, 1000});
         builder.setLights(Color.RED, 3000, 3000);
