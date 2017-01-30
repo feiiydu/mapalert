@@ -66,6 +66,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
     SharedPreferences sharedPreferences;
     private GoogleApiClient googleApiClient;
     NotificationManager manager;
+    int error;
 
 
 
@@ -100,8 +101,14 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
         butclear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                manager.cancel(1000);
-                Toast.makeText(getApplicationContext(),"Alert Stopped.. ",Toast.LENGTH_SHORT).show();
+                try {
+                    manager.cancel(1000);
+                }catch (NullPointerException e){
+                    error =1;
+                    Toast.makeText(getApplicationContext(),"No alert to stop..",Toast.LENGTH_SHORT).show();
+                }
+                if(error!=1){Toast.makeText(getApplicationContext(),"Alert Stopped..",Toast.LENGTH_SHORT).show();}
+
             }
         });
 
