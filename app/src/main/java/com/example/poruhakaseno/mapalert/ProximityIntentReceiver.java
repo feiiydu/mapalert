@@ -16,6 +16,7 @@ import android.location.LocationManager;
 import android.util.Log;
 
 
+
 import static java.security.AccessController.getContext;
 
 public class ProximityIntentReceiver extends BroadcastReceiver {
@@ -46,7 +47,6 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         builder.setTicker("Map Alert !!");
         builder.setContentTitle("Map Alert !!");
         builder.setContentText("You are near your destination...");
-        builder.setSmallIcon(R.mipmap.ic_launcher);
         builder.setLargeIcon(bitmap);
         builder.setVibrate(new long[] { 500, 1000, 500 });
         builder.setContentIntent(pendingIntent);

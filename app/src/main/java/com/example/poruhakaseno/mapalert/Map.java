@@ -14,7 +14,14 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
-
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -61,19 +68,39 @@ import android.Manifest;
 
 public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final String PROX_ALERT_INTENT = "com.example.poruhakaseno.mapalert";
-
+    protected LocationRequest mLocationRequest;
     private GoogleMap mMap;
     GoogleMap googleMap;
     LocationManager locationManager;
     PendingIntent pendingIntent;
     SharedPreferences sharedPreferences;
     private GoogleApiClient googleApiClient;
-    NotificationManager manager;
+    public NotificationManager manager;
+    LatLng now;
     int error=0;
     GoogleApiClient mGoogleApiClient;
+
     Location mLastLocation;
     double lat1 ;
     double lon1 ;
+    protected static final String TAGG = "location-updates-sample";
+
+    /**
+     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
+     */
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+
+    /**
+     * The fastest rate for active location updates. Exact. Updates will never be more frequent
+     * than this value.
+     */
+    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
+            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+
+    // Keys for storing activity state in the Bundle.
+    protected final static String REQUESTING_LOCATION_UPDATES_KEY = "requesting-location-updates-key";
+    protected final static String LOCATION_KEY = "location-key";
+    protected final static String LAST_UPDATED_TIME_STRING_KEY = "last-updated-time-string-key";
 
 
 
@@ -96,6 +123,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
                     .build();
+            createLocationRequest();
         }
 
         Spinner  dropdown = (Spinner)findViewById(R.id.spinner1);
@@ -108,11 +136,14 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
         Button yourButton = (Button) findViewById(R.id.button3);
         yourButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                try {mMap.clear();
-                mydest = null;
-                Toast.makeText(getApplicationContext(),"Already Cleared..",Toast.LENGTH_SHORT).show();}
+                try {
+                    mMap.clear();
+                    if(checkPermission()) {
+                        locationManager.removeProximityAlert(proximityIntent);
+                    }
+                    Toast.makeText(getApplicationContext(),"Already Cleared..",Toast.LENGTH_SHORT).show();}
                 catch(NullPointerException e){Toast.makeText(getApplicationContext(),"No alert to clear..",Toast.LENGTH_SHORT).show();}
-               // mMap.moveCamera();
+
             }
         });
 
@@ -121,7 +152,10 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
             @Override
             public void onClick(View view) {
                 try {
-                    manager.cancel(77);
+                    manager.cancelAll();
+                    if(checkPermission()) {
+                        locationManager.removeProximityAlert(proximityIntent);
+                    }
                     error =0;
                 }catch (NullPointerException e){
                     error =1;
@@ -148,10 +182,13 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
                 else {
                     double lat2 = mydest.latitude;
                     double lon2 = mydest.longitude;
+                    if(checkPermission()) {
+                        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                    }
                     addProximityAlert();
                     Location locationA = new Location("point A");
-                    locationA.setLatitude(lat1);
-                    locationA.setLongitude(lon1);
+                    locationA.setLatitude(mLastLocation.getLatitude());
+                    locationA.setLongitude(mLastLocation.getLongitude());
                     Location locationB = new Location("point B");
                     locationB.setLatitude(lat2);
                     locationB.setLongitude(lon2);
@@ -159,9 +196,9 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
                     Toast.makeText(getApplicationContext(), "Distance: "
                             + distance + "m.", Toast.LENGTH_SHORT).show();
                     //add proxi alert
-                    LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+                    locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
                     if (checkPermission()) {
-                        locationManager.addProximityAlert(mydest.latitude, mydest.longitude, returnradious(), -1, proximityIntent);
+                        locationManager.addProximityAlert(mydest.latitude, mydest.longitude, returnradious(), 60000, proximityIntent);
                     }
                     IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT);
                     registerReceiver(new ProximityIntentReceiver(), filter);
@@ -230,12 +267,13 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             googleMap.setMyLocationEnabled(true);
+
         } else {
             Toast.makeText(getBaseContext(), "Please enable location access..", Toast.LENGTH_SHORT).show();
         }
-        LatLng BKK = new LatLng(13.752092, 100.500893);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BKK,10.0f));
 
+        now = new LatLng(13.6899991,100.7479237);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(now, 7));
         googleMap.setOnMapClickListener(new OnMapClickListener() {
             Marker mydestination;
             @Override
@@ -243,7 +281,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
                 mMap = googleMap;
                 mMap.clear();
                 mydestination = mMap.addMarker(new MarkerOptions().position(latLng).title("My Destination"));
-                if(returnradious()!=0)Toast.makeText(getBaseContext(), "Alert is added", Toast.LENGTH_SHORT).show();
+                if(returnradious()!=0)Toast.makeText(getBaseContext(), "Destination added", Toast.LENGTH_SHORT).show();
                 mMap.addCircle(new CircleOptions().center(latLng).radius(returnradious()).fillColor(Color.BLUE).strokeWidth(2).strokeColor(Color.BLACK));
                 mydest = latLng;
             }
@@ -289,11 +327,36 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
         if (mLastLocation != null) {
             lon1 = mLastLocation.getLongitude();
             lat1 = mLastLocation.getLatitude();
+            now = new LatLng(lat1,lon1);
 
         } else {
             Toast.makeText(this,"no_location_detected", Toast.LENGTH_LONG).show();
         }
+
+
     }
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+
+        // Sets the desired interval for active location updates. This interval is
+        // inexact. You may not receive updates at all if no location sources are available, or
+        // you may receive them slower than requested. You may also receive updates faster than
+        // requested if other applications are requesting location at a faster interval.
+        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+
+        // Sets the fastest rate for active location updates. This interval is exact, and your
+        // application will never receive updates faster than this value.
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+    protected void startLocationUpdates() {
+
+
+    }
+
+
+
 
     /**
      * Manipulates the map once available.
