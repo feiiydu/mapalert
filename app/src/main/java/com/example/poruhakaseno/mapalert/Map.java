@@ -186,7 +186,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
                 try {
                     NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     manager.cancel(77);
-                    
+
                     mydest=null;
                     if(checkPermission()) {
                         locationManager.removeProximityAlert(proximityIntent);
