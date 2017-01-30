@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.provider.SyncStateContract;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -57,7 +59,7 @@ import com.google.android.gms.location.LocationServices;
 import android.Manifest;
 
 
-public class Map extends FragmentActivity implements OnMapReadyCallback {
+public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final String PROX_ALERT_INTENT = "com.example.poruhakaseno.mapalert";
 
     private GoogleMap mMap;
@@ -68,6 +70,12 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
     private GoogleApiClient googleApiClient;
     NotificationManager manager;
     int error=0;
+    GoogleApiClient mGoogleApiClient;
+    Location mLastLocation;
+    double lat1 ;
+    double lon1 ;
+
+
 
 
 
@@ -80,6 +88,15 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
 
         Spinner  dropdown = (Spinner)findViewById(R.id.spinner1);
 
@@ -123,8 +140,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
             public void onClick(View v){
                 double lat2 = mydest.latitude;
                 double lon2 = mydest.longitude;
-                double lat1 = mMap.getMyLocation().getLatitude();
-                double lon1 = mMap.getMyLocation().getLongitude();
+
 
                 if(returnradious()==0){
                     Toast.makeText(getApplicationContext(), "Please Choose radios first.. ", Toast.LENGTH_SHORT).show();
@@ -215,8 +231,8 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
         } else {
             Toast.makeText(getBaseContext(), "Please enable location access..", Toast.LENGTH_SHORT).show();
         }
-        LatLng kmitl = new LatLng(13.752092, 100.500893);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(kmitl,10.0f));
+        LatLng BKK = new LatLng(13.752092, 100.500893);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(BKK,10.0f));
 
         googleMap.setOnMapClickListener(new OnMapClickListener() {
             Marker mydestination;
@@ -232,12 +248,50 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
         });
 
     }
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
 
 
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
+        // onConnectionFailed.
+        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+    }
 
 
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // The connection to Google Play services was lost for some reason. We call connect() to
+        // attempt to re-establish the connection.
+        Log.i(TAG, "Connection suspended");
+        mGoogleApiClient.connect();
+    }
 
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // Provides a simple way of getting a device's location and is well suited for
+        // applications that do not require a fine-grained location and that do not need location
+        // updates. Gets the best and most recent location currently available, which may be null
+        // in rare cases when a location is not available.
+        if(checkPermission()) {
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        }
+        if (mLastLocation != null) {
+            lon1 = mLastLocation.getLongitude();
+            lat1 = mLastLocation.getLatitude();
 
+        } else {
+            Toast.makeText(this,"no_location_detected", Toast.LENGTH_LONG).show();
+        }
+    }
 
     /**
      * Manipulates the map once available.
