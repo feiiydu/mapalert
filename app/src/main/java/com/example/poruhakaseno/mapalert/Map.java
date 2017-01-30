@@ -1,8 +1,10 @@
 package com.example.poruhakaseno.mapalert;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -52,8 +54,7 @@ import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-
-import static com.example.poruhakaseno.mapalert.ProximityIntentReceiver.NOTIFICATION_ID;
+import android.Manifest;
 
 
 public class Map extends FragmentActivity implements OnMapReadyCallback {
@@ -66,7 +67,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
     SharedPreferences sharedPreferences;
     private GoogleApiClient googleApiClient;
     NotificationManager manager;
-    int error;
+    int error=0;
 
 
 
@@ -103,11 +104,14 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
             public void onClick(View view) {
                 try {
                     manager.cancel(1000);
+                    error =0;
                 }catch (NullPointerException e){
                     error =1;
                     Toast.makeText(getApplicationContext(),"No alert to stop..",Toast.LENGTH_SHORT).show();
                 }
-                if(error!=1){Toast.makeText(getApplicationContext(),"Alert Stopped..",Toast.LENGTH_SHORT).show();}
+                if(error!=1){Toast.makeText(getApplicationContext(),"Alert Stopped..",Toast.LENGTH_SHORT).show();
+
+                }
 
             }
         });
@@ -122,24 +126,29 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
                 double lat1 = mMap.getMyLocation().getLatitude();
                 double lon1 = mMap.getMyLocation().getLongitude();
 
-                addProximityAlert();
-                Location locationA = new Location("point A");
-                locationA.setLatitude(lat1);
-                locationA.setLongitude(lon1);
-                Location locationB = new Location("point B");
-                locationB.setLatitude(lat2);
-                locationB.setLongitude(lon2);
-                float distance = locationA.distanceTo(locationB);
-                Toast.makeText(getApplicationContext(), "Distance: "
-                        + distance, Toast.LENGTH_SHORT).show();
-                //add proxi alert
-                LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-                if(checkPermission()){}
-                locationManager.addProximityAlert(mydest.latitude,mydest.longitude, 50, 60000, proximityIntent);
-                IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT);
-                registerReceiver(new ProximityIntentReceiver(), filter);
-                Toast.makeText(getApplicationContext(),"Alert Started.. ",Toast.LENGTH_SHORT).show();
-
+                if(returnradious()==0){
+                    Toast.makeText(getApplicationContext(), "Please Choose radios first.. ", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    addProximityAlert();
+                    Location locationA = new Location("point A");
+                    locationA.setLatitude(lat1);
+                    locationA.setLongitude(lon1);
+                    Location locationB = new Location("point B");
+                    locationB.setLatitude(lat2);
+                    locationB.setLongitude(lon2);
+                    float distance = locationA.distanceTo(locationB);
+                    Toast.makeText(getApplicationContext(), "Distance: "
+                            + distance, Toast.LENGTH_SHORT).show();
+                    //add proxi alert
+                    LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+                    if (checkPermission()) {
+                        locationManager.addProximityAlert(mydest.latitude, mydest.longitude, returnradious(), -1, proximityIntent);
+                    }
+                    IntentFilter filter = new IntentFilter(PROX_ALERT_INTENT);
+                    registerReceiver(new ProximityIntentReceiver(), filter);
+                    Toast.makeText(getApplicationContext(), "Alert Started.. ", Toast.LENGTH_SHORT).show();
+                }
 
 
 
@@ -152,13 +161,14 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
     PendingIntent proximityIntent;
     private void addProximityAlert() {
         Intent intent = new Intent(PROX_ALERT_INTENT);
-         proximityIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        proximityIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
     }
+
     private static final String TAG = "location";
     static final int  REQUEST_locate_PERMISSION = 1;
-    private boolean checkPermission(){
+    public boolean checkPermission(){
         if (android.os.Build.VERSION.SDK_INT >= 23 ) {
-            //requestPermissions(new String[]{Manifest.permission.LOCATION}, REQUEST_locate_PERMISSION);
+            requestPermissions(new String[]{Manifest.permission_group.LOCATION}, REQUEST_locate_PERMISSION);
             return false;
         }else{
             return true;
@@ -194,8 +204,17 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
 
     }
     LatLng mydest = null;
+
+
+
     @Override
     public void onMapReady(final GoogleMap googleMap) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            googleMap.setMyLocationEnabled(true);
+        } else {
+            Toast.makeText(getBaseContext(), "Please enable location access..", Toast.LENGTH_SHORT).show();
+        }
         LatLng kmitl = new LatLng(13.752092, 100.500893);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(kmitl,10.0f));
 
@@ -216,41 +235,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback {
 
 
 
-    private void drawMarker(LatLng point){
-        // Creating an instance of MarkerOptions
-        MarkerOptions markerOptions = new MarkerOptions();
 
-        // Setting latitude and longitude for the marker
-        markerOptions.position(point);
-
-        // Adding marker on the Google Map
-        googleMap.addMarker(markerOptions);
-    }
-
-    private void drawCircle(LatLng point){
-
-        // Instantiating CircleOptions to draw a circle around the marker
-        CircleOptions circleOptions = new CircleOptions();
-
-        // Specifying the center of the circle
-        circleOptions.center(point);
-
-        // Radius of the circle
-        circleOptions.radius(20);
-
-        // Border color of the circle
-        circleOptions.strokeColor(Color.BLACK);
-
-        // Fill color of the circle
-        circleOptions.fillColor(0x30ff0000);
-
-        // Border width of the circle
-        circleOptions.strokeWidth(2);
-
-        // Adding the circle to the GoogleMap
-        googleMap.addCircle(circleOptions);
-
-    }
 
 
 
