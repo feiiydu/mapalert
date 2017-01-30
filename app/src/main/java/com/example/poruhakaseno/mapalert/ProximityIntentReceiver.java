@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.util.Log;
 
 
@@ -47,15 +48,18 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
         builder.setTicker("Map Alert !!");
         builder.setContentTitle("Map Alert !!");
         builder.setContentText("You are near your destination...");
-        builder.setSmallIcon(R.drawable.carnoti);
+        builder.setSmallIcon(R.drawable.howtousebutton);
         builder.setLargeIcon(bitmap);
-        builder.setVibrate(new long[] { 500, 1000, 500 });
+        builder.setVibrate(new long[] { 500, 500, 500, 500, 500, 1000,1000, 1000, 1000, 1000});
+        builder.setLights(Color.RED, 3000, 3000);
+        builder.setSound(Uri.parse("uri://sadfasdfasdf.mp3"));
         builder.setContentIntent(pendingIntent);
         builder.setOngoing(true);
         builder.setSubText("Please looking for your destination.");
         builder.build();
 
         notification = builder.getNotification();
+        notification.defaults |= Notification.DEFAULT_SOUND;
         notificationManager.notify(77, notification);
     }
 

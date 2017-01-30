@@ -18,9 +18,15 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -37,9 +43,20 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.LocationManager;
 import android.os.Bundle;
+
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.widget.Toast;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -66,7 +83,8 @@ import com.google.android.gms.location.LocationServices;
 import android.Manifest;
 
 
-public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,PlaceSelectionListener {
     private static final String PROX_ALERT_INTENT = "com.example.poruhakaseno.mapalert";
     protected LocationRequest mLocationRequest;
     private GoogleMap mMap;
@@ -75,6 +93,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
     PendingIntent pendingIntent;
     SharedPreferences sharedPreferences;
     private GoogleApiClient googleApiClient;
+    int PLACE_PICKER_REQUEST = 1;
     public NotificationManager manager;
     LatLng now;
     int error=0;
@@ -112,9 +131,6 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
 
 
         if (mGoogleApiClient == null) {
@@ -122,9 +138,22 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(Places.PLACE_DETECTION_API)
+                    .enableAutoManage(this, this)
                     .build();
             createLocationRequest();
         }
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
+                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        autocompleteFragment.setOnPlaceSelectedListener(this);
+
+
 
         Spinner  dropdown = (Spinner)findViewById(R.id.spinner1);
 
@@ -247,7 +276,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
         int ans;
         if(dropdown.getSelectedItemPosition()==0){
             ans = 0;
-            Toast.makeText(getBaseContext(), "Please choose radius.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), "Please choose radius first..", Toast.LENGTH_SHORT).show();
         }else if(dropdown.getSelectedItemPosition()==1){
             ans = 500;
         }else if(dropdown.getSelectedItemPosition()==2){
@@ -262,22 +291,51 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
 
 
 
+
+    @Override
+    public void onError(Status status) {
+        // TODO: Handle the error.
+        Log.i(TAG, "An error occurred: " + status);
+    }
+
+    @Override
+    public void onPlaceSelected(Place place) {
+        // TODO: Get info about the selected place.
+        if(returnradious()==0){
+        }
+        else{
+        mydest = null;
+        mMap.clear();
+        LatLng latLng = place.getLatLng();
+        mMap.addMarker(new MarkerOptions().position(latLng).title("My Destination"));
+        if(returnradious()!=0)Toast.makeText(getBaseContext(), "Destination added", Toast.LENGTH_SHORT).show();
+        mMap.addCircle(new CircleOptions().center(latLng).radius(returnradious()).fillColor(Color.BLUE).strokeWidth(2).strokeColor(Color.BLACK));
+        mydest = latLng;
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mydest, 13.7f));
+        Log.i(TAG, "Place: " + place.getName());
+        }
+    }
+
+
     @Override
     public void onMapReady(final GoogleMap googleMap) {
+
+        mMap = googleMap;
+
+        now = new LatLng(13.689999,100.7479237);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             googleMap.setMyLocationEnabled(true);
-
         } else {
             Toast.makeText(getBaseContext(), "Please enable location access..", Toast.LENGTH_SHORT).show();
         }
 
-        now = new LatLng(13.6899991,100.7479237);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(now, 7));
         googleMap.setOnMapClickListener(new OnMapClickListener() {
             Marker mydestination;
             @Override
             public void onMapClick(LatLng latLng) {
+                mydest = null;
                 mMap = googleMap;
                 mMap.clear();
                 mydestination = mMap.addMarker(new MarkerOptions().position(latLng).title("My Destination"));
@@ -288,6 +346,7 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
         });
 
     }
+
     protected void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
@@ -350,10 +409,9 @@ public class Map extends FragmentActivity implements OnMapReadyCallback,GoogleAp
 
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
-    protected void startLocationUpdates() {
 
 
-    }
+
 
 
 
