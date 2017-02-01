@@ -13,6 +13,9 @@
 
             <TextView
                 android:text="HOW TO USE MAP-ALERT!!"
+                android:textSize="28sp"
+                android:textColor="@color/colorPrimaryDark"
+                android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/textView" />
@@ -24,9 +27,11 @@
                 android:id="@+id/imageButton"
                  />
             <TextView
-                android:text="1.กดปุ่ม Mark Your Destination"
+                android:text="1.Press Mark Your Destination."
                 android:layout_width="wrap_content"
+                android:textSize="20sp"
                 android:layout_height="wrap_content"
+
                 android:id="@+id/textView1" />
 
             <ImageView
@@ -34,11 +39,13 @@
                 android:layout_height="fill_parent"
                 android:background ="@drawable/a2"
                 android:id="@+id/imageButton1"
+
                 />
             <TextView
-                android:text="3"
+                android:text="2. Choose the radius for alert."
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="20sp"
                 android:id="@+id/textView3" />
 
             <ImageView
@@ -48,9 +55,10 @@
                 android:id="@+id/imageButton3"
                 />
             <TextView
-                android:text="3"
+                android:text="3. Mark your destination."
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="20sp"
                 android:id="@+id/textView4" />
 
             <ImageView
@@ -60,8 +68,9 @@
                 android:id="@+id/imageButton4"
                 />
             <TextView
-                android:text="3"
+                android:text="4. Press start."
                 android:layout_width="wrap_content"
+                android:textSize="20sp"
                 android:layout_height="wrap_content"
                 android:id="@+id/textView5" />
 
@@ -72,8 +81,9 @@
                 android:id="@+id/imageButton5"
                 />
             <TextView
-                android:text="3"
+                android:text="5. Alert is Started"
                 android:layout_width="wrap_content"
+                android:textSize="20sp"
                 android:layout_height="wrap_content"
                 android:id="@+id/textView6" />
 
@@ -84,9 +94,10 @@
                 android:id="@+id/imageButton6"
                 />
             <TextView
-                android:text="3"
+                android:text="6. When near the destination, you will receive a alert."
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="20sp"
                 android:id="@+id/textView7" />
 
             <ImageView
@@ -96,9 +107,10 @@
                 android:id="@+id/imageButton7"
                 />
             <TextView
-                android:text="3"
+                android:text="7. You can click to stop it."
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="20sp"
                 android:id="@+id/textView8" />
 
             <ImageView
@@ -107,6 +119,12 @@
                 android:background ="@drawable/a6"
                 android:id="@+id/imageButton8"
                 />
+            <TextView
+                android:text="8. Press clear button to clear ALL."
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:id="@+id/textView9" />
 
         </LinearLayout>
 
