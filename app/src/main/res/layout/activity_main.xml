@@ -13,9 +13,10 @@
 
 
     <Button
-        android:text="Mark your Destination"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/mark"
         android:layout_marginBottom="92dp"
         android:id="@+id/button1"
         android:layout_alignParentBottom="true"
